@@ -6,3 +6,7 @@ ext, PAYMENT_01_RESPONSE  text, EHF_30A_1_0  text, EHF_XYA_1_0_REMINDER  text, B
 ext, name  text, regdate  text, EHF_INVOICE_2_0  text, EHF_CATALOGUE  text, BIS05_V2  text, PEPPOLBIS_01A_2_0  text)"
 c.execute(table_create)
 '''
+
+# Do this instead
+c.execute('SELECT * FROM elma')
+print(c.fetchone())

@@ -15,69 +15,100 @@ def fetchELMAList():
     print("Difi ELMA participants downloaded successfully")
     return difi_result.text
 
-def writeELMAtoDB(csv_file):
-    #https://stackoverflow.com/questions/2887878/importing-a-csv-file-into-a-sqlite3-database-table-using-python
-    #  Connect to local db
+def writeELMAtoDB(csv_string):
+    # https://stackoverflow.com/questions/2887878/importing-a-csv-file-into-a-sqlite3-database-table-using-python
+    # Connect to local db
     conn = sqlite3.connect(db)
     c = conn.cursor()
+    # Rebuild tables
     c.execute("DROP TABLE IF EXISTS elma")
-
+    c.execute("DROP TABLE IF EXISTS elmaAddress")
     c.execute("CREATE TABLE elma (identifier, name, EHF_CREDITNOTE_2_0, sanitized)")
-    # Insert a row of data
-    df = pandas.read_csv(csv_file, delimiter=";")
-    print(df)
+    # Insert rows in csv file using pandas lib
+    df = pandas.read_csv(StringIO(csv_string), delimiter=";")
     df[["identifier", "name", "EHF_CREDITNOTE_2_0"]].to_sql("elma", conn, if_exists='append', index=False)
+    # Write to db and close connection
     conn.commit()
-    # Do this instead
-    c.execute('SELECT * FROM elma')
-    print(c.fetchone())
     conn.close()
 
 def findNonEHF():
+    # Connect to local db
     conn = sqlite3.connect(db)
     c = conn.cursor()
+    # Select 100 first entries of ELMA users without EHF
     c.execute('SELECT identifier FROM elma WHERE EHF_CREDITNOTE_2_0="Nei" LIMIT 100')
-    #print(c.fetchall())
+    # Fetch result and close connection. Returns result
     result = c.fetchall()
     conn.close()
     return result
 
-def fetchNonEHFAddress(rows):
-    print("Fetching Addresses for 100 ELMA participants without EHF...")
+def fetchNonEHFBrregInfo(rows):
     results = []
+
+    print("Fetching brreg info for 100 ELMA participants without EHF...")
     for row in rows:
         brreg_result = requests.get('http://data.brreg.no/enhetsregisteret/enhet/%s.csv' % row[0])  # CSV file. ";" as seperator. Every value enclosed in ' " '
+
         if(brreg_result.status_code != 200):
             print("Error occured, skipping")
-            break #break for debugging purposes
-        results.append(brreg_result.text)  # Crash on failure
-        print("brreg ELMA participants without EHF downloaded successfully")
+            continue
 
+        results.append(brreg_result.text)
+        print("brreg ELMA participant added")
+
+    print(" %s brreg ELMA participants without EHF downloaded successfully" % len(results))
+    return results
+
+def fetchAndWriteAddressFromBrregResults(results):
     for result in results:
+        # Convert Brreg info to pandas data frame
         df = pandas.read_csv(StringIO(result), delimiter=";")
-        #print(df)
+        # Select which collums to keep
         address_info = df[["organisasjonsnummer","forretningsadresse.adresse","forretningsadresse.postnummer"
                          ,"forretningsadresse.poststed","forretningsadresse.landkode"
                          ,"forretningsadresse.land"]]
+        # Rename collumns
         address_info.rename(columns=lambda x: x.replace("forretningsadresse.", ""), inplace=True)
         address_info.rename(columns={"organisasjonsnummer":"identifier"}, inplace=True)
-        #print(address_info.to_dict("records"))
-        print(address_info)
-        conn = sqlite3.connect(db)
-        c = conn.cursor()
-        address_info.to_sql("elmaAddress", conn, if_exists='append', index=False)
-        conn.commit()
 
-        c.execute('''SELECT *
-        FROM elma
-        INNER JOIN elmaAddress ON elma.identifier=elmaAddress.identifier''')
-        print(c.fetchall())
-        conn.close()
+        writeAddressInfoToDb(address_info)
 
-    return address_info.to_dict("records")
+def writeAddressInfoToDb(address_info):
+    print("Writing address to db")
+    conn = sqlite3.connect(db)
+    c = conn.cursor()
+    # Write to table "elmaAddress". Bad practice.
+    address_info.to_sql("elmaAddress", conn, if_exists='append', index=False)
+    # Write to db and close connection
+    conn.commit()
+    conn.close()
+
+def getUsersWithoutEHF():
+    conn = sqlite3.connect(db)
+    c = conn.cursor()
+    c.execute('''SELECT *
+    FROM elma
+    INNER JOIN elmaAddress ON elma.identifier=elmaAddress.identifier''')
+    result = c.fetchall()
+    conn.close()
+    return result
+
+def writeUsersWithoutEHFToCSV():
+    conn = sqlite3.connect(db)
+    df = pandas.read_sql(sql='''SELECT elma.identifier, name, adresse, postnummer, poststed, landkode, land
+    FROM elma
+    INNER JOIN elmaAddress ON elma.identifier=elmaAddress.identifier''', con=conn)
+    df.to_csv('NonEHfUsers.csv', index=False)
 # Main
-'''
+# Get ELMA users from DIFI and wirte to DB
 elma_list = fetchELMAList()
-writeELMAtoDB(StringIO(elma_list))
-'''
-print(fetchNonEHFAddress(findNonEHF()))  # Returns a list of row objects
+writeELMAtoDB(elma_list)
+
+# Get non EHF users from DB, get their info from brreg and write address to db
+non_EHF = findNonEHF()
+non_EHF_brreg_info = fetchNonEHFBrregInfo(non_EHF)
+fetchAndWriteAddressFromBrregResults(non_EHF_brreg_info)
+
+# Find the users in DB without ehf and their addesses
+print(getUsersWithoutEHF())
+writeUsersWithoutEHFToCSV()
