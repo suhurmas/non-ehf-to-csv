@@ -1,0 +1,8 @@
+'''
+table_create = "CREATE TABLE elma (EHF_ORDER_RESPONSE  text, EHF_CATALOGUE_RESPONSE  text, EHF_INVOICE_CREDITNOTE_2_0  text, BIS36_MLR  text, PAYMENT_02_RESPONSE
+text, PEPPOLBIS_03A_2_0  text, PEPPOLBIS_28A_2_0  text, PEPPOLBIS_30A_2_0  text, BIS04_V2  text, identifier  text, EHF_CREDITNOTE_2_0  text, EHF_ORD
+ER  text, PEPPOLBIS_3_0_BILLING_01_CII  text, PEPPOLBIS_28A_2_0_RESPONSE  text, BIS01  text, PEPPOLBIS_3_0_BILLING_01_UBL  text, Icd  text, BIS03  t
+ext, PAYMENT_01_RESPONSE  text, EHF_30A_1_0  text, EHF_XYA_1_0_REMINDER  text, BIS06  text, ISO20022_Pain_001  text, PAYMENT_02  text, PAYMENT_01  t
+ext, name  text, regdate  text, EHF_INVOICE_2_0  text, EHF_CATALOGUE  text, BIS05_V2  text, PEPPOLBIS_01A_2_0  text)"
+c.execute(table_create)
+'''
