@@ -4,7 +4,7 @@ import pandas
 from io import StringIO
 
 # Initialize DB
-db = "example2.db"
+db = "ELMA-EHF.db"
 conn = sqlite3.connect(db)
 c = conn.cursor()
 
