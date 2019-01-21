@@ -87,7 +87,6 @@ conn = sqlite3.connect(db)
 c = conn.cursor()
 # Write to table "elmaAddress". Bad practice.
 address_info.to_sql("elmaAddress", conn, if_exists='append', index=False)
-conn.commit()
 
 # Mark added users as sanitized
 c.execute('''UPDATE elma
