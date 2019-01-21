@@ -92,7 +92,7 @@ ON elma.identifier=elmaAddress.identifier
 WHERE elma.sanitized = "yes"''', con=conn)
 
 print("Constructing csv with %s rows fetched from db" % len(df.index))
-df.to_csv('NonEHfUsers.csv', index=False)
+df.to_csv('NonEHFUsers.csv', index=False)
 
 def getUsersWithoutEHF():
     conn = sqlite3.connect(db)
