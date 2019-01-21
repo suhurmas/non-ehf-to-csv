@@ -31,9 +31,8 @@ df[["identifier", "name", "EHF_CREDITNOTE_2_0"]].to_sql("elma", conn, if_exists=
 # Check if there is any non_ehf users at all. If not; create some
 c.execute('SELECT count(*) FROM elma WHERE EHF_CREDITNOTE_2_0="Nei"')
 has_non_ehf_users = c.fetchone()
-if(has_non_ehf_users[0] > 0):
+if(has_non_ehf_users[0] == 0):
     print("DB has no non_ehf_users, creating some")
-    print(has_non_ehf_users[0])
     c.execute('''
     UPDATE elma
     SET EHF_CREDITNOTE_2_0="Nei"
@@ -44,13 +43,7 @@ if(has_non_ehf_users[0] > 0):
     ORDER BY RANDOM()
     LIMIT 100)
     ''')
-    c.execute('SELECT count(*) FROM elma WHERE EHF_CREDITNOTE_2_0="Nei"')
-    has_non_ehf_users = c.fetchone()
-    print(has_non_ehf_users[0])
     conn.commit()
-
-quit()
-
 
 # Select 100 first entries of ELMA users without EHF
 c.execute('SELECT identifier, name FROM elma WHERE EHF_CREDITNOTE_2_0="Nei" LIMIT 100')
