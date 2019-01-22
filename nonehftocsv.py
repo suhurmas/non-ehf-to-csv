@@ -110,12 +110,3 @@ df = pandas.read_sql(sql='''SELECT elma.identifier, name, adresse, postnummer, p
 
 print("Constructing csv with %s rows fetched from db" % len(df.index))
 df.to_csv('NonEHFUsers.csv', index=False)
-
-def getUsersWithoutEHF():
-    conn = sqlite3.connect(db)
-    c = conn.cursor()
-    df = pandas.read_sql(sql='''SELECT *
-    FROM elma
-    INNER JOIN elmaAddress ON elma.identifier=elmaAddress.identifier''', con=conn)
-    conn.close()
-    return df
