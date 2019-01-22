@@ -3,7 +3,7 @@ Writes addresses of orgs without EHF to CSV file.
 Also exposes address-DB via a REST api
 
 
-#### To run:    
+#### Setup:    
 pip install requirements.txt    
 
 
