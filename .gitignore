@@ -13,3 +13,4 @@ pip-selfcheck.json
 main.py
 table.txt
 requests
+__pycache__

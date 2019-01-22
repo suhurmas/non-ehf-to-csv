@@ -43,8 +43,8 @@ if(has_non_ehf_users[0] == 0):
                 LIMIT 100)''')
     conn.commit()
 
-# Select 100 first entries of ELMA users without EHF
-c.execute('SELECT identifier, name FROM elma WHERE EHF_CREDITNOTE_2_0="Nei" LIMIT 100')
+# Select 125 random entries of ELMA users without EHF. 125 since we have about 20-25% failure rate from brreg
+c.execute('SELECT identifier, name FROM elma WHERE EHF_CREDITNOTE_2_0="Nei" ORDER BY RANDOM() LIMIT 125')
 elma_ehf_no = c.fetchall()
 conn.close() # Close since we're doing other OI now
 
@@ -74,9 +74,12 @@ for result in results:
 address_info = data_frame[["organisasjonsnummer","forretningsadresse.adresse",
                            "forretningsadresse.postnummer","forretningsadresse.poststed",
                            "forretningsadresse.landkode" ,"forretningsadresse.land"]]
+# Drop rows with NaN values
+address_info = address_info.dropna()
 # Rename collumns
 address_info.rename(columns=lambda x: x.replace("forretningsadresse.", ""), inplace=True)
 address_info.rename(columns={"organisasjonsnummer":"identifier"}, inplace=True)
+
 
 print(address_info)
 print("After processing %s brreg results. We have %s entries ready to be inserted into db" % (len(results), len(address_info.index)))
@@ -96,7 +99,7 @@ conn.commit()
 
 # Debugging
 result = c.execute('''SELECT * FROM elmaAddress''')
-print("We wrote %s rows from data frame to DB, and DB returned %s rows" % (len(data_frame.index), len(result.fetchall())))
+print("We wrote %s rows from data frame to DB, and DB returned %s rows" % (len(address_info.index), len(result.fetchall())))
 
 # Get sanitized users and write their identifier, name and address to csv file
 df = pandas.read_sql(sql='''SELECT elma.identifier, name, adresse, postnummer, poststed, landkode, land
