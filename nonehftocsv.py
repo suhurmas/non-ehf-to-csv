@@ -79,6 +79,8 @@ address_info = address_info.dropna()
 # Rename collumns
 address_info.rename(columns=lambda x: x.replace("forretningsadresse.", ""), inplace=True)
 address_info.rename(columns={"organisasjonsnummer":"identifier"}, inplace=True)
+# Force integer representation of postal numbers
+address_info.postnummer = address_info.postnummer.astype(int)
 
 
 print(address_info)
