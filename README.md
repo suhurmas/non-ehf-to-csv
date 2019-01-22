@@ -15,16 +15,16 @@ rest.py
 Creates a very simple GET api to acccess the DB. Returns a json string.    
 usage:    
 localhost:8080/clients?params=value    
-list of params:
-    postnummer
-    name
-    adresse
-    poststed
-    land
-    landkode
-    identifier
-    encoding:
-        json - default
-        csv
-        html
+list of params:    
+        postnummer    
+        name    
+        adresse    
+        poststed    
+        land    
+        landkode    
+        identifier    
+        encoding:    
+                json - default    
+                csv    
+                html    
 No params list entire address list.
