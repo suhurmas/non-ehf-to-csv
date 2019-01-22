@@ -22,9 +22,9 @@ print("Difi ELMA participants downloaded successfully")
 
 # Write CSV file to DB
 df = pandas.read_csv(StringIO(difi_result.text), delimiter=";")
-# Dropping duplicte values, since difi_result contains something like 40K duplicates
+# Dropping duplicte values, since difi_result contains something like 20K duplicates
 df.sort_values("identifier", inplace = True)
-df.drop_duplicates(subset ="identifier", keep = False, inplace = True)
+df.drop_duplicates(subset ="identifier", keep = "first", inplace = True)
 df = df[["identifier", "name", "EHF_CREDITNOTE_2_0"]] # keep only "identifier", "name", "EHF_CREDITNOTE_2_0"
 df.to_sql("elma", conn, if_exists='append', index=False)
 
